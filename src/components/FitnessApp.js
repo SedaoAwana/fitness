@@ -1,24 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function FitnessApp() {
-  const [step, setStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [photo, setPhoto] = useState(null);
-  const [form, setForm] = useState({
-    name: '',
-    age: '',
-    gender: '',
-    weight: '',
-    height: '',
-    workSituation: '',
-    eatingHabits: '',
-    lifestyle: '',
-    goal: '',
-    workoutLocation: '',
-    experienceLevel: '',
-    timeAvailable: '',
-    injuries: '',
+  const [form, setForm] = useState(() => {
+    // Load saved progress from localStorage for mobile persistence
+    const saved = localStorage.getItem('fitnessFormProgress');
+    return saved ? JSON.parse(saved) : {
+      name: '',
+      age: '',
+      gender: '',
+      weight: '',
+      height: '',
+      workSituation: '',
+      eatingHabits: '',
+      lifestyle: '',
+      goal: '',
+      workoutLocation: '',
+      experienceLevel: '',
+      timeAvailable: '',
+      injuries: '',
+    };
   });
   const [program, setProgram] = useState(null);
+
+  // Auto-save form progress for mobile users
+  useEffect(() => {
+    localStorage.setItem('fitnessFormProgress', JSON.stringify(form));
+  }, [form]);
 
   // Simulate expert advice based on user input
   function generateProgram(data) {
@@ -73,10 +82,95 @@ function FitnessApp() {
     };
   }
 
+  // Define mobile-optimized steps for progressive disclosure
+  const steps = [
+    {
+      id: 'welcome',
+      title: 'Your Fitness Journey',
+      subtitle: 'Get your personalized plan in 3 minutes',
+      type: 'welcome'
+    },
+    {
+      id: 'basic-info',
+      title: 'About You',
+      subtitle: 'Basic information',
+      type: 'form',
+      fields: ['name', 'age', 'gender']
+    },
+    {
+      id: 'goals',
+      title: 'Your Goals',
+      subtitle: 'What do you want to achieve?',
+      type: 'form',
+      fields: ['goal', 'experienceLevel']
+    },
+    {
+      id: 'measurements',
+      title: 'Measurements',
+      subtitle: 'Current stats',
+      type: 'form',
+      fields: ['weight', 'height']
+    },
+    {
+      id: 'lifestyle',
+      title: 'Lifestyle',
+      subtitle: 'How you live & work',
+      type: 'form',
+      fields: ['workSituation', 'lifestyle', 'timeAvailable']
+    },
+    {
+      id: 'preferences',
+      title: 'Preferences',
+      subtitle: 'Where & how you exercise',
+      type: 'form',
+      fields: ['workoutLocation', 'eatingHabits', 'injuries']
+    },
+    {
+      id: 'photo',
+      title: 'Photo (Optional)',
+      subtitle: 'Help us understand your starting point',
+      type: 'photo'
+    },
+    {
+      id: 'results',
+      title: 'Your Plan',
+      subtitle: 'Personalized fitness program',
+      type: 'results'
+    }
+  ];
+
   function handlePhotoUpload(e) {
     const file = e.target.files[0];
     if (file) {
-      setPhoto(URL.createObjectURL(file));
+      // Optimize image for mobile performance
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          // Resize to max 800px for mobile performance
+          const maxSize = 800;
+          let { width, height } = img;
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          setPhoto(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -84,363 +178,591 @@ function FitnessApp() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleFormSubmit(e) {
-    e.preventDefault();
-    setStep(2);
+  function nextStep() {
+    if (currentStep === steps.length - 2) { // Photo step
+      const generated = generateProgram(form);
+      setProgram(generated);
+    }
+    setCurrentStep(currentStep + 1);
   }
 
-  function handlePhotoSubmit() {
-    const generated = generateProgram(form);
-    setProgram(generated);
-    setStep(3);
+  function prevStep() {
+    setCurrentStep(currentStep - 1);
   }
 
-  function isFormComplete() {
-    const requiredFields = ['name', 'age', 'gender', 'weight', 'height', 'goal', 'workoutLocation', 'experienceLevel', 'timeAvailable'];
-    return requiredFields.every(field => form[field] && form[field].trim() !== '');
+  function isStepComplete(step) {
+    if (step.type === 'welcome' || step.type === 'photo' || step.type === 'results') return true;
+    return step.fields.every(field => form[field] && form[field].trim() !== '');
+  }
+
+  function canProceed() {
+    return isStepComplete(steps[currentStep]);
+  }
+
+  // Mobile-optimized progress bar
+  function renderProgressBar() {
+    const progress = ((currentStep + 1) / steps.length) * 100;
+    return (
+      <div style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '4px',
+        backgroundColor: '#e9ecef',
+        zIndex: 1000
+      }}>
+        <div style={{
+          width: `${progress}%`,
+          backgroundColor: '#3498db',
+          height: '100%',
+          transition: 'width 0.3s ease'
+        }} />
+      </div>
+    );
+  }
+
+  // Engaging welcome screen with value proposition
+  function renderWelcomeStep() {
+    return (
+      <div style={{ 
+        padding: '20px', 
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>🏋️‍♀️</div>
+        <h1 style={{ 
+          fontSize: '2rem', 
+          color: '#2c3e50', 
+          marginBottom: '15px',
+          fontWeight: 'bold',
+          lineHeight: '1.2'
+        }}>
+          Transform Your Fitness
+        </h1>
+        <p style={{ 
+          fontSize: '1.1rem', 
+          color: '#7f8c8d', 
+          marginBottom: '30px',
+          lineHeight: '1.5'
+        }}>
+          Get your personalized workout plan in just 3 minutes
+        </p>
+        
+        <div style={{ marginBottom: '40px' }}>
+          <div style={{ 
+            backgroundColor: '#f8f9fa', 
+            padding: '20px', 
+            borderRadius: '15px',
+            border: '2px solid #e9ecef',
+            marginBottom: '15px'
+          }}>
+            <div style={{ fontSize: '24px', marginBottom: '10px' }}>🎯</div>
+            <h3 style={{ margin: '0 0 10px 0', color: '#2c3e50', fontSize: '1.1rem' }}>Personalized Goals</h3>
+            <p style={{ margin: 0, color: '#7f8c8d', fontSize: '14px' }}>
+              Tailored to your specific objectives
+            </p>
+          </div>
+          <div style={{ 
+            backgroundColor: '#f8f9fa', 
+            padding: '20px', 
+            borderRadius: '15px',
+            border: '2px solid #e9ecef',
+            marginBottom: '15px'
+          }}>
+            <div style={{ fontSize: '24px', marginBottom: '10px' }}>💪</div>
+            <h3 style={{ margin: '0 0 10px 0', color: '#2c3e50', fontSize: '1.1rem' }}>Expert Guidance</h3>
+            <p style={{ margin: 0, color: '#7f8c8d', fontSize: '14px' }}>
+              Based on proven fitness principles
+            </p>
+          </div>
+          <div style={{ 
+            backgroundColor: '#f8f9fa', 
+            padding: '20px', 
+            borderRadius: '15px',
+            border: '2px solid #e9ecef'
+          }}>
+            <div style={{ fontSize: '24px', marginBottom: '10px' }}>📱</div>
+            <h3 style={{ margin: '0 0 10px 0', color: '#2c3e50', fontSize: '1.1rem' }}>Mobile Optimized</h3>
+            <p style={{ margin: 0, color: '#7f8c8d', fontSize: '14px' }}>
+              Designed for your phone & tablet
+            </p>
+          </div>
+        </div>
+
+        <button 
+          onClick={nextStep}
+          style={{ 
+            width: '100%',
+            padding: '18px', 
+            backgroundColor: '#3498db', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '15px', 
+            fontSize: '18px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            boxShadow: '0 4px 15px rgba(52, 152, 219, 0.3)',
+            transition: 'all 0.3s ease',
+            minHeight: '56px' // Mobile touch target
+          }}
+          onTouchStart={(e) => {
+            e.target.style.transform = 'scale(0.98)';
+          }}
+          onTouchEnd={(e) => {
+            e.target.style.transform = 'scale(1)';
+          }}
+        >
+          Start My Journey →
+        </button>
+      </div>
+    );
+  }
+
+  // Progressive form steps with mobile-optimized fields
+  function renderFormStep() {
+    const step = steps[currentStep];
+    const fieldConfigs = {
+      name: { type: 'text', placeholder: 'Your full name', label: 'Name' },
+      age: { type: 'tel', placeholder: 'Your age', label: 'Age' },
+      gender: { 
+        type: 'select', 
+        options: [
+          { value: '', label: 'Select gender' },
+          { value: 'male', label: 'Male' },
+          { value: 'female', label: 'Female' },
+          { value: 'other', label: 'Other' }
+        ],
+        label: 'Gender'
+      },
+      goal: { 
+        type: 'select', 
+        options: [
+          { value: '', label: 'What\'s your primary goal?' },
+          { value: 'lose fat', label: 'Lose Fat' },
+          { value: 'build muscle', label: 'Build Muscle' },
+          { value: 'increase strength', label: 'Increase Strength' },
+          { value: 'improve health', label: 'Improve Health' },
+          { value: 'maintain fitness', label: 'Maintain Fitness' }
+        ],
+        label: 'Fitness Goal'
+      },
+      experienceLevel: { 
+        type: 'select', 
+        options: [
+          { value: '', label: 'Select experience level' },
+          { value: 'beginner', label: 'Beginner (0-6 months)' },
+          { value: 'intermediate', label: 'Intermediate (6 months - 2 years)' },
+          { value: 'advanced', label: 'Advanced (2+ years)' }
+        ],
+        label: 'Experience Level'
+      },
+      weight: { type: 'number', placeholder: 'Weight in kg', label: 'Current Weight' },
+      height: { type: 'number', placeholder: 'Height in cm', label: 'Height' },
+      workSituation: { type: 'text', placeholder: 'e.g., desk job, active job', label: 'Work Situation' },
+      lifestyle: { type: 'text', placeholder: 'e.g., sedentary, active', label: 'Lifestyle' },
+      timeAvailable: { 
+        type: 'select', 
+        options: [
+          { value: '', label: 'Time per session?' },
+          { value: '30min', label: '30 minutes' },
+          { value: '45min', label: '45 minutes' },
+          { value: '60min', label: '60 minutes' },
+          { value: '90min', label: '90+ minutes' }
+        ],
+        label: 'Time Available'
+      },
+      workoutLocation: { 
+        type: 'select', 
+        options: [
+          { value: '', label: 'Where will you work out?' },
+          { value: 'home', label: 'Home (No equipment)' },
+          { value: 'home gym', label: 'Home Gym' },
+          { value: 'gym', label: 'Commercial Gym' },
+          { value: 'outdoor', label: 'Outdoor' }
+        ],
+        label: 'Workout Location'
+      },
+      eatingHabits: { type: 'text', placeholder: 'e.g., 3 meals/day', label: 'Eating Habits' },
+      injuries: { type: 'text', placeholder: 'Any injuries? (optional)', label: 'Injuries/Limitations' }
+    };
+
+    return (
+      <div style={{ 
+        padding: '20px', 
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}>
+        <div style={{ marginBottom: '30px' }}>
+          <h2 style={{ 
+            color: '#2c3e50', 
+            marginBottom: '10px', 
+            fontSize: '1.8rem',
+            textAlign: 'center'
+          }}>
+            {step.title}
+          </h2>
+          <p style={{ 
+            color: '#7f8c8d', 
+            fontSize: '1rem',
+            textAlign: 'center'
+          }}>
+            {step.subtitle}
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {step.fields.map(fieldName => {
+            const config = fieldConfigs[fieldName];
+            return (
+              <div key={fieldName}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '8px', 
+                  fontWeight: 'bold', 
+                  color: '#2c3e50',
+                  fontSize: '16px'
+                }}>
+                  {config.label}
+                </label>
+                {config.type === 'select' ? (
+                  <select
+                    name={fieldName}
+                    value={form[fieldName]}
+                    onChange={handleChange}
+                    required
+                    style={{ 
+                      width: '100%', 
+                      padding: '16px', 
+                      border: '2px solid #e9ecef', 
+                      borderRadius: '12px', 
+                      fontSize: '16px',
+                      backgroundColor: 'white',
+                      transition: 'border-color 0.3s ease',
+                      minHeight: '56px' // Mobile touch target
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#3498db'}
+                    onBlur={(e) => e.target.style.borderColor = '#e9ecef'}
+                  >
+                    {config.options.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={config.type}
+                    name={fieldName}
+                    placeholder={config.placeholder}
+                    value={form[fieldName]}
+                    onChange={handleChange}
+                    required={fieldName !== 'injuries'}
+                    style={{ 
+                      width: '100%', 
+                      padding: '16px', 
+                      border: '2px solid #e9ecef', 
+                      borderRadius: '12px', 
+                      fontSize: '16px',
+                      backgroundColor: 'white',
+                      transition: 'border-color 0.3s ease',
+                      minHeight: '56px' // Mobile touch target
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#3498db'}
+                    onBlur={(e) => e.target.style.borderColor = '#e9ecef'}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Mobile-optimized photo upload with camera integration
+  function renderPhotoStep() {
+    return (
+      <div style={{ 
+        textAlign: 'center', 
+        padding: '20px',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>📸</div>
+        <h2 style={{ 
+          color: '#2c3e50', 
+          marginBottom: '15px', 
+          fontSize: '1.8rem' 
+        }}>
+          Add a Photo (Optional)
+        </h2>
+        <p style={{ 
+          color: '#7f8c8d', 
+          marginBottom: '30px', 
+          fontSize: '1rem' 
+        }}>
+          This helps us better understand your starting point
+        </p>
+        
+        <div style={{ marginBottom: '30px' }}>
+          <input 
+            type="file" 
+            accept="image/*" 
+            capture="environment"
+            onChange={handlePhotoUpload}
+            style={{ 
+              marginBottom: '20px',
+              width: '100%',
+              padding: '16px',
+              border: '2px dashed #bdc3c7',
+              borderRadius: '12px',
+              backgroundColor: '#f8f9fa'
+            }}
+          />
+          {photo && (
+            <div>
+              <img 
+                src={photo} 
+                alt="User" 
+                style={{ 
+                  width: '100%',
+                  maxWidth: '300px',
+                  height: 'auto',
+                  borderRadius: '15px',
+                  border: '3px solid #3498db',
+                  boxShadow: '0 4px 15px rgba(52, 152, 219, 0.3)'
+                }} 
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Celebratory results page with personalized plan
+  function renderResultsStep() {
+    return (
+      <div style={{ 
+        padding: '20px',
+        minHeight: '100vh'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '20px' }}>🎉</div>
+          <h2 style={{ 
+            color: '#2c3e50', 
+            marginBottom: '15px', 
+            fontSize: '1.8rem' 
+          }}>
+            Your Personalized Plan
+          </h2>
+          <p style={{ 
+            color: '#7f8c8d', 
+            fontSize: '1rem' 
+          }}>
+            Here's your custom program designed just for you
+          </p>
+        </div>
+        
+        <div style={{ 
+          backgroundColor: '#f8f9fa', 
+          padding: '20px', 
+          borderRadius: '15px', 
+          marginBottom: '20px',
+          border: '2px solid #e9ecef'
+        }}>
+          <h3 style={{ 
+            color: '#2c3e50', 
+            marginBottom: '15px', 
+            fontSize: '1.3rem' 
+          }}>
+            🎯 Recommended Expert
+          </h3>
+          <p style={{ 
+            fontSize: '18px', 
+            fontWeight: 'bold', 
+            color: '#3498db',
+            margin: 0
+          }}>
+            {program.expert}
+          </p>
+        </div>
+
+        <div style={{ 
+          backgroundColor: '#f8f9fa', 
+          padding: '20px', 
+          borderRadius: '15px', 
+          marginBottom: '20px',
+          border: '2px solid #e9ecef'
+        }}>
+          <h3 style={{ 
+            color: '#2c3e50', 
+            marginBottom: '15px', 
+            fontSize: '1.3rem' 
+          }}>
+            📋 Your Training Plan
+          </h3>
+          <p style={{ 
+            fontSize: '16px', 
+            lineHeight: '1.6', 
+            marginBottom: '15px' 
+          }}>
+            {program.plan}
+          </p>
+          <p style={{ 
+            fontSize: '18px', 
+            fontWeight: 'bold', 
+            color: '#27ae60',
+            margin: 0
+          }}>
+            Frequency: {program.frequency}
+          </p>
+        </div>
+
+        <div style={{ 
+          backgroundColor: '#f8f9fa', 
+          padding: '20px', 
+          borderRadius: '15px', 
+          marginBottom: '20px',
+          border: '2px solid #e9ecef'
+        }}>
+          <h3 style={{ 
+            color: '#2c3e50', 
+            marginBottom: '15px', 
+            fontSize: '1.3rem' 
+          }}>
+            💡 Key Tips for Success
+          </h3>
+          <ul style={{ 
+            fontSize: '16px', 
+            lineHeight: '1.6', 
+            margin: 0, 
+            paddingLeft: '20px' 
+          }}>
+            {program.tips.map((tip, idx) => (
+              <li key={idx} style={{ marginBottom: '10px' }}>{tip}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  // Dynamic step content rendering
+  function renderStepContent() {
+    const step = steps[currentStep];
+    
+    switch (step.type) {
+      case 'welcome':
+        return renderWelcomeStep();
+      case 'form':
+        return renderFormStep();
+      case 'photo':
+        return renderPhotoStep();
+      case 'results':
+        return renderResultsStep();
+      default:
+        return null;
+    }
+  }
+
+  // Mobile-optimized navigation with touch feedback
+  function renderNavigation() {
+    const step = steps[currentStep];
+    
+    if (step.type === 'welcome') return null;
+    
+    return (
+      <div style={{ 
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        padding: '20px',
+        backgroundColor: 'white',
+        borderTop: '1px solid #e9ecef',
+        boxShadow: '0 -2px 10px rgba(0,0,0,0.1)'
+      }}>
+        <button 
+          onClick={prevStep}
+          style={{ 
+            padding: '16px 24px', 
+            backgroundColor: '#95a5a6', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '12px', 
+            fontSize: '16px',
+            cursor: 'pointer',
+            transition: 'background-color 0.3s ease',
+            minHeight: '56px'
+          }}
+          onTouchStart={(e) => {
+            e.target.style.transform = 'scale(0.98)';
+          }}
+          onTouchEnd={(e) => {
+            e.target.style.transform = 'scale(1)';
+          }}
+        >
+          ← Back
+        </button>
+        
+        <div style={{ fontSize: '14px', color: '#7f8c8d' }}>
+          {currentStep + 1} of {steps.length}
+        </div>
+        
+        <button 
+          onClick={nextStep}
+          disabled={!canProceed()}
+          style={{ 
+            padding: '16px 24px', 
+            backgroundColor: canProceed() ? '#27ae60' : '#bdc3c7',
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '12px', 
+            fontSize: '16px',
+            cursor: canProceed() ? 'pointer' : 'not-allowed',
+            fontWeight: 'bold',
+            transition: 'all 0.3s ease',
+            minHeight: '56px'
+          }}
+          onTouchStart={(e) => {
+            if (canProceed()) {
+              e.target.style.transform = 'scale(0.98)';
+            }
+          }}
+          onTouchEnd={(e) => {
+            if (canProceed()) {
+              e.target.style.transform = 'scale(1)';
+            }
+          }}
+        >
+          {currentStep === steps.length - 2 ? 'Get My Plan' : 'Continue'}
+        </button>
+      </div>
+    );
   }
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', fontFamily: 'sans-serif', padding: '20px' }}>
-      <h1 style={{ textAlign: 'center', color: '#2c3e50', marginBottom: '30px' }}>
-        🏋️‍♀️ Personalized Fitness Program
-      </h1>
-      
-      {step === 1 && (
-        <div>
-          <h2 style={{ color: '#34495e', marginBottom: '20px' }}>Step 1: Tell Us About Yourself</h2>
-          <p style={{ color: '#7f8c8d', marginBottom: '25px' }}>
-            Fill out this form to get your personalized fitness program tailored to your goals and lifestyle.
-          </p>
-          
-          <form onSubmit={handleFormSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                style={{ padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              />
-              <input
-                type="number"
-                name="age"
-                placeholder="Age"
-                value={form.age}
-                onChange={handleChange}
-                required
-                style={{ padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              />
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-              <select
-                name="gender"
-                value={form.gender}
-                onChange={handleChange}
-                required
-                style={{ padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-              <select
-                name="experienceLevel"
-                value={form.experienceLevel}
-                onChange={handleChange}
-                required
-                style={{ padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              >
-                <option value="">Experience Level</option>
-                <option value="beginner">Beginner (0-6 months)</option>
-                <option value="intermediate">Intermediate (6 months - 2 years)</option>
-                <option value="advanced">Advanced (2+ years)</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-              <input
-                type="number"
-                name="weight"
-                placeholder="Weight (kg)"
-                value={form.weight}
-                onChange={handleChange}
-                required
-                style={{ padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              />
-              <input
-                type="number"
-                name="height"
-                placeholder="Height (cm)"
-                value={form.height}
-                onChange={handleChange}
-                required
-                style={{ padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '15px' }}>
-              <select
-                name="goal"
-                value={form.goal}
-                onChange={handleChange}
-                required
-                style={{ width: '100%', padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              >
-                <option value="">What's your primary fitness goal?</option>
-                <option value="lose fat">Lose Fat</option>
-                <option value="build muscle">Build Muscle</option>
-                <option value="increase strength">Increase Strength</option>
-                <option value="improve health">Improve Overall Health</option>
-                <option value="maintain fitness">Maintain Current Fitness</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-              <select
-                name="workoutLocation"
-                value={form.workoutLocation}
-                onChange={handleChange}
-                required
-                style={{ padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              >
-                <option value="">Where will you work out?</option>
-                <option value="home">Home (No equipment)</option>
-                <option value="home gym">Home Gym (Some equipment)</option>
-                <option value="gym">Commercial Gym</option>
-                <option value="outdoor">Outdoor</option>
-              </select>
-              <select
-                name="timeAvailable"
-                value={form.timeAvailable}
-                onChange={handleChange}
-                required
-                style={{ padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              >
-                <option value="">Time available per session</option>
-                <option value="30min">30 minutes</option>
-                <option value="45min">45 minutes</option>
-                <option value="60min">60 minutes</option>
-                <option value="90min">90+ minutes</option>
-              </select>
-            </div>
-
-            <div style={{ marginBottom: '15px' }}>
-              <input
-                type="text"
-                name="workSituation"
-                placeholder="Work Situation (e.g., desk job, active job, student)"
-                value={form.workSituation}
-                onChange={handleChange}
-                style={{ width: '100%', padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '15px' }}>
-              <input
-                type="text"
-                name="eatingHabits"
-                placeholder="Current Eating Habits (e.g., 3 meals/day, intermittent fasting, etc.)"
-                value={form.eatingHabits}
-                onChange={handleChange}
-                style={{ width: '100%', padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '15px' }}>
-              <input
-                type="text"
-                name="lifestyle"
-                placeholder="Lifestyle (e.g., sedentary, moderately active, very active)"
-                value={form.lifestyle}
-                onChange={handleChange}
-                style={{ width: '100%', padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '25px' }}>
-              <input
-                type="text"
-                name="injuries"
-                placeholder="Any injuries or limitations? (optional)"
-                value={form.injuries}
-                onChange={handleChange}
-                style={{ width: '100%', padding: '12px', border: '1px solid #bdc3c7', borderRadius: '5px', fontSize: '16px' }}
-              />
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={!isFormComplete()}
-              style={{ 
-                width: '100%', 
-                padding: '15px', 
-                backgroundColor: isFormComplete() ? '#3498db' : '#bdc3c7',
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '5px', 
-                fontSize: '18px', 
-                cursor: isFormComplete() ? 'pointer' : 'not-allowed',
-                fontWeight: 'bold'
-              }}
-            >
-              Continue to Photo Upload (Optional)
-            </button>
-          </form>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div>
-          <h2 style={{ color: '#34495e', marginBottom: '20px' }}>Step 2: Upload a Photo (Optional)</h2>
-          <p style={{ color: '#7f8c8d', marginBottom: '25px' }}>
-            Upload a photo to help us better understand your current fitness level and body composition.
-          </p>
-          
-          <div style={{ textAlign: 'center', marginBottom: '25px' }}>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handlePhotoUpload}
-              style={{ marginBottom: '15px' }}
-            />
-            {photo && (
-              <div>
-                <img 
-                  src={photo} 
-                  alt="User" 
-                  style={{ 
-                    width: 200, 
-                    height: 200, 
-                    objectFit: 'cover',
-                    borderRadius: '10px',
-                    border: '3px solid #3498db'
-                  }} 
-                />
-              </div>
-            )}
-          </div>
-          
-          <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-            <button 
-              onClick={() => setStep(1)}
-              style={{ 
-                padding: '12px 24px', 
-                backgroundColor: '#95a5a6', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '5px', 
-                fontSize: '16px',
-                cursor: 'pointer'
-              }}
-            >
-              Back
-            </button>
-            <button 
-              onClick={handlePhotoSubmit}
-              style={{ 
-                padding: '12px 24px', 
-                backgroundColor: '#27ae60', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '5px', 
-                fontSize: '16px',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              Generate My Program
-            </button>
-          </div>
-        </div>
-      )}
-
-      {step === 3 && program && (
-        <div>
-          <h2 style={{ color: '#34495e', marginBottom: '20px', textAlign: 'center' }}>Your Personalized Fitness Program</h2>
-          
-          <div style={{ 
-            backgroundColor: '#f8f9fa', 
-            padding: '25px', 
-            borderRadius: '10px', 
-            marginBottom: '25px',
-            border: '2px solid #e9ecef'
-          }}>
-            <h3 style={{ color: '#2c3e50', marginBottom: '15px' }}>🎯 Recommended Expert</h3>
-            <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#3498db' }}>{program.expert}</p>
-          </div>
-
-          <div style={{ 
-            backgroundColor: '#f8f9fa', 
-            padding: '25px', 
-            borderRadius: '10px', 
-            marginBottom: '25px',
-            border: '2px solid #e9ecef'
-          }}>
-            <h3 style={{ color: '#2c3e50', marginBottom: '15px' }}>📋 Your Training Plan</h3>
-            <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '10px' }}>{program.plan}</p>
-            <p style={{ fontSize: '16px', fontWeight: 'bold', color: '#27ae60' }}>
-              Frequency: {program.frequency}
-            </p>
-          </div>
-
-          <div style={{ 
-            backgroundColor: '#f8f9fa', 
-            padding: '25px', 
-            borderRadius: '10px', 
-            marginBottom: '25px',
-            border: '2px solid #e9ecef'
-          }}>
-            <h3 style={{ color: '#2c3e50', marginBottom: '15px' }}>💡 Key Tips for Success</h3>
-            <ul style={{ fontSize: '16px', lineHeight: '1.8' }}>
-              {program.tips.map((tip, idx) => (
-                <li key={idx} style={{ marginBottom: '8px' }}>{tip}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <button 
-              onClick={() => {
-                setStep(1);
-                setPhoto(null);
-                setProgram(null);
-                setForm({
-                  name: '',
-                  age: '',
-                  gender: '',
-                  weight: '',
-                  height: '',
-                  workSituation: '',
-                  eatingHabits: '',
-                  lifestyle: '',
-                  goal: '',
-                  workoutLocation: '',
-                  experienceLevel: '',
-                  timeAvailable: '',
-                  injuries: '',
-                });
-              }}
-              style={{ 
-                padding: '15px 30px', 
-                backgroundColor: '#3498db', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '5px', 
-                fontSize: '16px',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              Start Over
-            </button>
-          </div>
-        </div>
-      )}
+    <div style={{ 
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      backgroundColor: 'white',
+      minHeight: '100vh',
+      paddingBottom: '100px' // Space for fixed navigation
+    }}>
+      {renderProgressBar()}
+      {renderStepContent()}
+      {renderNavigation()}
     </div>
   );
 }
