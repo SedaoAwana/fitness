@@ -2,6 +2,7 @@ import React from 'react';
 import Label from '../atoms/Label';
 import Input from '../atoms/Input';
 import Select from '../atoms/Select';
+import ErrorMessage from '../atoms/ErrorMessage';
 import { spacing } from '../../design-tokens';
 
 const FormField = ({ 
@@ -15,6 +16,7 @@ const FormField = ({
   disabled = false,
   fullWidth = true,
   size = 'md',
+  error,
   style,
   ...props 
 }) => {
@@ -61,6 +63,8 @@ const FormField = ({
           {...props}
         />
       )}
+      
+      <ErrorMessage message={error} visible={!!error} />
     </div>
   );
 };

@@ -10,6 +10,7 @@ const StepNavigation = ({
   currentStep,
   totalSteps,
   nextButtonText = 'Continue',
+  disabled = false,
   style,
   ...props 
 }) => {
@@ -35,6 +36,7 @@ const StepNavigation = ({
         variant="secondary"
         size="md"
         onClick={onBack}
+        disabled={disabled}
       >
         ← Back
       </Button>
@@ -48,7 +50,7 @@ const StepNavigation = ({
         variant={canProceed ? 'success' : 'secondary'}
         size="md"
         onClick={onNext}
-        disabled={!canProceed}
+        disabled={!canProceed || disabled}
       >
         {nextButtonText}
       </Button>

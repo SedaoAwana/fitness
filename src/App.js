@@ -1,11 +1,11 @@
 import React from 'react';
-import FitnessAppAtomic from './components/FitnessAppAtomic';
+import FitnessAppSimple from './components/FitnessAppSimple';
 import './styles/App.css';
 
 function App() {
   return (
     <div className="App">
-      <FitnessAppAtomic />
+      <FitnessAppSimple />
     </div>
   );
 }

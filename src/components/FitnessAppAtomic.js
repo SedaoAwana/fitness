@@ -10,7 +10,7 @@ const FitnessAppAtomic = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [photo, setPhoto] = useState(null);
   const [form, setForm] = useState(() => {
-    // Load saved progress from localStorage for mobile persistence
+    // Load saved progress from localStorage
     const saved = localStorage.getItem('fitnessFormProgress');
     return saved ? JSON.parse(saved) : {
       name: '',
@@ -315,6 +315,8 @@ const FitnessAppAtomic = () => {
     }
     setCurrentStep(currentStep + 1);
   }
+
+
 
   function prevStep() {
     setCurrentStep(currentStep - 1);
