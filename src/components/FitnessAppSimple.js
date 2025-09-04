@@ -105,6 +105,82 @@ const FitnessAppSimple = () => {
     }
   };
 
+  // Add authentication handlers
+  const handleAuthChange = (e) => {
+    setAuthForm({ ...authForm, [e.target.name]: e.target.value });
+    setAuthError(''); // Clear error when user types
+  };
+
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setAuthError('');
+
+    try {
+      if (authMode === 'signup') {
+        // Validate signup
+        if (authForm.password !== authForm.confirmPassword) {
+          setAuthError('Passwords do not match');
+          return;
+        }
+        if (authForm.password.length < 6) {
+          setAuthError('Password must be at least 6 characters');
+          return;
+        }
+        
+        // Simulate signup (we'll replace this with Supabase later)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('Signing up:', authForm.email);
+        
+        // For now, just authenticate the user
+        setIsAuthenticated(true);
+        localStorage.setItem('fitnessAuth', JSON.stringify({
+          isAuthenticated: true,
+          user: { email: authForm.email, fullName: authForm.fullName }
+        }));
+        
+      } else {
+        // Simulate signin (we'll replace this with Supabase later)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('Signing in:', authForm.email);
+        
+        // For now, just authenticate the user
+        setIsAuthenticated(true);
+        localStorage.setItem('fitnessAuth', JSON.stringify({
+          isAuthenticated: true,
+          user: { email: authForm.email }
+        }));
+      }
+    } catch (error) {
+      setAuthError('Authentication failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+    setForm({
+      name: '',
+      age: '',
+      gender: '',
+      weight: '',
+      height: '',
+      work_situation: '',
+      eating_habits: '',
+      lifestyle: '',
+      goal: '',
+      workout_location: '',
+      experience_level: '',
+      time_available: '',
+      injuries: '',
+      photo: null,
+    });
+    localStorage.removeItem('fitnessAuth');
+    localStorage.removeItem('fitnessFormProgress');
+    setCurrentStep(0);
+  };
+
   const nextStep = () => {
     setCurrentStep(currentStep + 1);
   };
@@ -112,6 +188,149 @@ const FitnessAppSimple = () => {
   const prevStep = () => {
     setCurrentStep(currentStep - 1);
   };
+
+  // Add authentication screen render
+  if (!isAuthenticated) {
+    return (
+      <div style={{
+        fontFamily: typography.fontFamily.primary,
+        backgroundColor: colors.background.primary,
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: spacing.lg
+      }}>
+        <div style={{
+          backgroundColor: colors.background.secondary,
+          padding: spacing.xl,
+          borderRadius: spacing.md,
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          maxWidth: '400px',
+          width: '100%'
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: spacing.xl }}>
+            <div style={{ fontSize: '3rem', marginBottom: spacing.md }}>🏋️‍♀️</div>
+            <h1 style={{
+              color: colors.neutral[900],
+              marginBottom: spacing.sm,
+              fontSize: '1.5rem',
+              fontWeight: 'bold'
+            }}>
+              {authMode === 'signup' ? 'Create Account' : 'Welcome Back'}
+            </h1>
+            <p style={{
+              color: colors.neutral[500],
+              fontSize: '0.9rem'
+            }}>
+              {authMode === 'signup' 
+                ? 'Start your fitness journey today' 
+                : 'Sign in to continue your progress'
+              }
+            </p>
+          </div>
+
+          <form onSubmit={handleAuth}>
+            {authMode === 'signup' && (
+              <FormField
+                label="Full Name"
+                type="text"
+                name="fullName"
+                value={authForm.fullName}
+                onChange={handleAuthChange}
+                placeholder="Enter your full name"
+                required={true}
+                style={{ marginBottom: spacing.md }}
+              />
+            )}
+            
+            <FormField
+              label="Email"
+              type="email"
+              name="email"
+              value={authForm.email}
+              onChange={handleAuthChange}
+              placeholder="Enter your email"
+              required={true}
+              style={{ marginBottom: spacing.md }}
+            />
+            
+            <FormField
+              label="Password"
+              type="password"
+              name="password"
+              value={authForm.password}
+              onChange={handleAuthChange}
+              placeholder="Enter your password"
+              required={true}
+              style={{ marginBottom: spacing.md }}
+            />
+            
+            {authMode === 'signup' && (
+              <FormField
+                label="Confirm Password"
+                type="password"
+                name="confirmPassword"
+                value={authForm.confirmPassword}
+                onChange={handleAuthChange}
+                placeholder="Confirm your password"
+                required={true}
+                style={{ marginBottom: spacing.md }}
+              />
+            )}
+
+            {authError && (
+              <div style={{
+                color: colors.error.primary,
+                backgroundColor: colors.error.background,
+                padding: spacing.sm,
+                borderRadius: spacing.xs,
+                marginBottom: spacing.md,
+                fontSize: '0.9rem',
+                textAlign: 'center'
+              }}>
+                {authError}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              disabled={isLoading}
+              style={{ width: '100%', marginBottom: spacing.md }}
+            >
+              {isLoading ? 'Loading...' : (authMode === 'signup' ? 'Create Account' : 'Sign In')}
+            </Button>
+
+            <div style={{ textAlign: 'center' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
+                  setAuthError('');
+                  setAuthForm({ email: '', password: '', confirmPassword: '', fullName: '' });
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: colors.primary[600],
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  textDecoration: 'underline'
+                }}
+              >
+                {authMode === 'signup' 
+                  ? 'Already have an account? Sign in' 
+                  : "Don't have an account? Sign up"
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   const renderStep = () => {
     const step = steps[currentStep];
@@ -451,11 +670,11 @@ const FitnessAppSimple = () => {
               </div>
             </div>
             <Button
-              onClick={() => setCurrentStep(0)}
+              onClick={handleSignOut}
               variant="primary"
               size="lg"
             >
-              Start Over
+              Sign Out & Start Over
             </Button>
           </div>
         );
@@ -468,6 +687,27 @@ const FitnessAppSimple = () => {
       backgroundColor: colors.background.primary,
       minHeight: '100vh'
     }}>
+      {/* Header with user info and sign out */}
+      <div style={{
+        backgroundColor: colors.background.secondary,
+        padding: spacing.md,
+        borderBottom: `1px solid ${colors.neutral[200]}`,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: colors.neutral[700] }}>
+          🏋️‍♀️ Fitness App
+        </div>
+        <Button
+          onClick={handleSignOut}
+          variant="secondary"
+          size="sm"
+        >
+          Sign Out
+        </Button>
+      </div>
+      
       {renderStep()}
     </div>
   );
