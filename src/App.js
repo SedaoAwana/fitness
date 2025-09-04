@@ -4,9 +4,9 @@ import './styles/App.css';
 
 function App() {
   return (
-    <div className="App">
-      <FitnessAppSimple />
-    </div>
+      <div className="App">
+        <FitnessAppSimple />
+      </div>
   );
 }
 

@@ -10,6 +10,18 @@ import StepNavigation from './organisms/StepNavigation';
 
 const FitnessAppSimple = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  // Add authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authMode, setAuthMode] = useState('signin'); // 'signin' or 'signup'
+  const [authForm, setAuthForm] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: ''
+  });
+  const [authError, setAuthError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
   const [form, setForm] = useState({
     name: '',
     age: '',
