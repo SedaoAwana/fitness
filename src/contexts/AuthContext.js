@@ -56,6 +56,9 @@ export const AuthProvider = ({ children }) => {
         if (localFormData) {
           await migrateLocalData(result.user.id);
         }
+        
+        // New users always go to onboarding
+        window.location.href = '/onboarding';
       }
       return result;
     } catch (error) {
@@ -71,6 +74,13 @@ export const AuthProvider = ({ children }) => {
         setUser(result.user);
         const profile = await AuthService.getUserProfile(result.user.id);
         setUserProfile(profile);
+        
+        // Navigate based on onboarding status
+        if (!profile?.onboarding_complete) {
+          window.location.href = '/onboarding';
+        } else {
+          window.location.href = '/dashboard';
+        }
       }
       return result;
     } catch (error) {

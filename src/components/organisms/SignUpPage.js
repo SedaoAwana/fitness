@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import AuthForm from '../molecules/AuthForm';
 import Button from '../atoms/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { colors, spacing, typography } from '../../design-tokens';
 
-const SignUpPage = ({ onSwitchToSignIn, style, ...props }) => {
+const SignUpPage = ({ style, ...props }) => {
   const { signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -68,12 +69,12 @@ const SignUpPage = ({ onSwitchToSignIn, style, ...props }) => {
         
         <div style={switchTextStyles}>
           Already have an account?{' '}
-          <span 
+          <Link 
+            to="/signin"
             style={linkStyles}
-            onClick={onSwitchToSignIn}
           >
             Sign in here
-          </span>
+          </Link>
         </div>
       </div>
     </div>
