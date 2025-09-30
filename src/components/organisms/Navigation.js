@@ -1,20 +1,20 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../atoms/Button';
 import { colors, spacing, typography } from '../../design-tokens';
 
-const Navigation = () => {
+const Navigation = memo(() => {
   const { user, signOut } = useAuth();
   const location = useLocation();
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { path: '/dashboard', label: 'Dashboard', icon: '🏠' },
     { path: '/workouts', label: 'Workouts', icon: '💪' },
     { path: '/progress', label: 'Progress', icon: '📸' },
     { path: '/reports', label: 'Reports', icon: '📊' },
     { path: '/profile', label: 'Profile', icon: '👤' },
-  ];
+  ], []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -119,6 +119,8 @@ const Navigation = () => {
       </div>
     </nav>
   );
-};
+});
+
+Navigation.displayName = 'Navigation';
 
 export default Navigation;

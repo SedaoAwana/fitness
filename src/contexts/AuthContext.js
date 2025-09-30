@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -51,14 +53,23 @@ export const AuthProvider = ({ children }) => {
     try {
       const result = await AuthService.signUp(email, password, fullName);
       if (result.success) {
-        setUser(result.user);
-        // Migrate local data if exists
-        if (localFormData) {
-          await migrateLocalData(result.user.id);
+        if (result.needsEmailVerification) {
+          // User needs to verify email first
+          return { 
+            success: true, 
+            needsEmailVerification: true,
+            message: 'Please check your email and click the verification link to complete your registration.'
+          };
+        } else {
+          setUser(result.user);
+          // Migrate local data if exists
+          if (localFormData) {
+            await migrateLocalData(result.user.id);
+          }
+          
+          // New users always go to onboarding
+          navigate('/onboarding');
         }
-        
-        // New users always go to onboarding
-        window.location.href = '/onboarding';
       }
       return result;
     } catch (error) {
@@ -77,9 +88,9 @@ export const AuthProvider = ({ children }) => {
         
         // Navigate based on onboarding status
         if (!profile?.onboarding_complete) {
-          window.location.href = '/onboarding';
+          navigate('/onboarding');
         } else {
-          window.location.href = '/dashboard';
+          navigate('/dashboard');
         }
       }
       return result;

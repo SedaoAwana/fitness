@@ -10,18 +10,21 @@ class AuthService {
           data: { 
             full_name: fullName,
             email: email
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/email-verified`
         }
       });
       
       if (error) throw error;
       
-      // Create user profile
-      if (data.user) {
-        await this.createUserProfile(data.user.id, email, fullName);
-      }
+      // User profile is automatically created by database trigger
+      // No need to manually create it
       
-      return { success: true, user: data.user };
+      return { 
+        success: true, 
+        user: data.user,
+        needsEmailVerification: !data.user?.email_confirmed_at
+      };
     } catch (error) {
       console.error('Sign up error:', error);
       return { success: false, error: this.handleAuthError(error) };
@@ -106,15 +109,19 @@ class AuthService {
       case 'Invalid login credentials':
         return 'Invalid email or password';
       case 'Email not confirmed':
-        return 'Please check your email and confirm your account';
+        return 'Please check your email and click the verification link to confirm your account';
       case 'User already registered':
         return 'An account with this email already exists';
       case 'Password should be at least 6 characters':
         return 'Password must be at least 6 characters long';
       case 'Unable to validate email address: invalid format':
         return 'Please enter a valid email address';
+      case 'Signup requires a valid password':
+        return 'Please enter a valid password';
+      case 'User already registered':
+        return 'An account with this email already exists. Please sign in instead.';
       default:
-        return 'An error occurred. Please try again.';
+        return error.message || 'An error occurred. Please try again.';
     }
   }
 

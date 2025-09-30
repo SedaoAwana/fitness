@@ -64,8 +64,17 @@ export const colors = {
     overlay: 'rgba(0, 0, 0, 0.1)',
   },
   
+  // Text Colors
+  text: {
+    primary: '#2c3e50',
+    secondary: '#7f8c8d',
+    tertiary: '#95a5a6',
+    inverse: '#ffffff',
+  },
+  
   // Border Colors
   border: {
+    primary: '#e9ecef',
     light: '#e9ecef',
     medium: '#dee2e6',
     dark: '#ced4da',

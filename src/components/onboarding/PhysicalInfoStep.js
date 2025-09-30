@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { colors, spacing, typography } from '../../design-tokens';
 import Button from '../atoms/Button';
 import Input from '../atoms/Input';
+import Select from '../atoms/Select';
 
 const PhysicalInfoStep = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     weight: '',
     height: '',
+    bodyShape: '',
   });
 
   const containerStyles = {
@@ -45,6 +47,14 @@ const PhysicalInfoStep = () => {
     gap: spacing.md,
   };
 
+  const bodyShapeOptions = [
+    { value: '', label: 'Select body shape' },
+    { value: 'ectomorph', label: 'Ectomorph (Naturally thin, hard to gain weight)' },
+    { value: 'mesomorph', label: 'Mesomorph (Athletic, gains muscle easily)' },
+    { value: 'endomorph', label: 'Endomorph (Naturally heavier, gains weight easily)' },
+    { value: 'combination', label: 'Combination (Mix of body types)' },
+  ];
+
   const handleInputChange = (e) => {
     setForm({
       ...form,
@@ -53,7 +63,7 @@ const PhysicalInfoStep = () => {
   };
 
   const handleNext = () => {
-    if (form.weight && form.height) {
+    if (form.weight && form.height && form.bodyShape) {
       localStorage.setItem('onboarding_physical_info', JSON.stringify(form));
       navigate('/onboarding/lifestyle');
     }
@@ -85,6 +95,14 @@ const PhysicalInfoStep = () => {
           value={form.height}
           onChange={handleInputChange}
           placeholder="175"
+        />
+        
+        <Select
+          label="Body Shape"
+          name="bodyShape"
+          value={form.bodyShape}
+          onChange={handleInputChange}
+          options={bodyShapeOptions}
         />
       </div>
       

@@ -1,15 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { colors, spacing, typography } from '../../design-tokens';
 import Button from '../atoms/Button';
+import Select from '../atoms/Select';
 
 const WorkoutPreferencesStep = () => {
   const navigate = useNavigate();
+  const [form, setForm] = useState({
+    workoutLocation: '',
+    workoutFrequency: '',
+    workoutDuration: '',
+    experienceLevel: '',
+    availableEquipment: [],
+  });
 
   const containerStyles = {
     maxWidth: '500px',
     margin: '0 auto',
-    textAlign: 'center',
   };
 
   const titleStyles = {
@@ -17,12 +24,22 @@ const WorkoutPreferencesStep = () => {
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
     marginBottom: spacing.sm,
+    textAlign: 'center',
   };
 
   const subtitleStyles = {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
     marginBottom: spacing.xl,
+    textAlign: 'center',
+  };
+
+  const formStyles = {
+    backgroundColor: colors.background.secondary,
+    border: `1px solid ${colors.border.primary}`,
+    borderRadius: spacing.md,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
   };
 
   const buttonContainerStyles = {

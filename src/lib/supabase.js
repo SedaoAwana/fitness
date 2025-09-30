@@ -1,5 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
+console.log('ENV CHECK:', {
+  url: process.env.REACT_APP_SUPABASE_URL,
+  hasKey: !!process.env.REACT_APP_SUPABASE_ANON_KEY,
+  urlLength: process.env.REACT_APP_SUPABASE_URL?.length,
+  keyLength: process.env.REACT_APP_SUPABASE_ANON_KEY?.length
+});
+
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
@@ -7,6 +14,7 @@ const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 const supabase = (!supabaseUrl || !supabaseAnonKey) 
   ? (() => {
       console.warn('⚠️ Supabase environment variables not found. Using mock client for development.');
+      console.warn('URL exists:', !!supabaseUrl, 'Key exists:', !!supabaseAnonKey);
       
       // Create a mock client that won't crash the app
       return {
@@ -31,6 +39,9 @@ const supabase = (!supabaseUrl || !supabaseAnonKey)
         }
       };
     })()
-  : createClient(supabaseUrl, supabaseAnonKey);
+  : (() => {
+      console.log('✅ Using real Supabase client');
+      return createClient(supabaseUrl, supabaseAnonKey);
+    })();
 
 export { supabase };

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import AuthForm from '../molecules/AuthForm';
-import Button from '../atoms/Button';
-import { useAuth } from '../../contexts/AuthContext';
-import { colors, spacing, typography } from '../../design-tokens';
+import AuthForm from '../components/molecules/AuthForm';
+import Button from '../components/atoms/Button';
+import { useAuth } from '../contexts/AuthContext';
+import { colors, spacing, typography } from '../design-tokens';
 
 const SignInPage = ({ style, ...props }) => {
   const { signIn } = useAuth();

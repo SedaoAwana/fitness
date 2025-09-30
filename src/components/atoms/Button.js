@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { colors, spacing, borderRadius, typography, shadows, transitions } from '../../design-tokens';
 
-const Button = ({ 
+const Button = memo(({ 
   variant = 'primary', 
   size = 'md', 
   children, 
@@ -135,6 +135,8 @@ const Button = ({
       {children}
     </button>
   );
-};
+});
+
+Button.displayName = 'Button';
 
 export default Button;
