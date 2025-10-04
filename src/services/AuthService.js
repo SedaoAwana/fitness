@@ -58,6 +58,21 @@ class AuthService {
     }
   }
 
+  async forceSignOut() {
+    try {
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      
+      // Clear all session data
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Force sign out error:', error);
+      return { success: false, error: 'Failed to force sign out' };
+    }
+  }
+
   async getCurrentUser() {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
@@ -75,7 +90,7 @@ class AuthService {
         .from('user_profiles')
         .insert([
           {
-            id: userId,
+            id: userId,  // This was already correct
             email: email,
             full_name: fullName
           }
@@ -90,16 +105,39 @@ class AuthService {
 
   async getUserProfile(userId) {
     try {
-      const { data, error } = await supabase
+      console.log('🔍 getUserProfile called with userId:', userId);
+      
+      // Add a timeout promise to prevent infinite hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timeout after 5 seconds')), 5000)
+      );
+      
+      // The actual query
+      const queryPromise = supabase
         .from('user_profiles')
         .select('*')
         .eq('id', userId)
         .single();
       
-      if (error) throw error;
+      // Race between timeout and query
+      const result = await Promise.race([queryPromise, timeoutPromise]);
+      const { data, error } = result;
+      
+      console.log('🔍 getUserProfile result:', { data, error });
+      
+      if (error) {
+        // If no profile exists yet, that's okay - user needs to complete onboarding
+        if (error.code === 'PGRST116') {
+          console.log('🔍 No profile found (PGRST116) - user needs onboarding');
+          return null;
+        }
+        console.error('🔍 Database error:', error);
+        throw error;
+      }
+      console.log('🔍 Profile found:', data);
       return data;
     } catch (error) {
-      console.error('Get user profile error:', error);
+      console.error('🔍 Get user profile error:', error);
       return null;
     }
   }

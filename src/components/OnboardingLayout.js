@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { colors, spacing } from '../design-tokens';
+import OnboardingProgress from './onboarding/OnboardingProgress';
 
 const OnboardingLayout = () => {
   const containerStyles = {
@@ -32,12 +33,21 @@ const OnboardingLayout = () => {
     padding: spacing.xl,
   };
 
+  const progressContainerStyles = {
+    width: '100%',
+    maxWidth: '600px',
+    marginBottom: spacing.lg,
+  };
+
   return (
     <div style={containerStyles}>
       <header style={headerStyles}>
         <h1 style={brandStyles}>🏋️‍♀️ Fitness App</h1>
       </header>
       <main style={contentStyles}>
+        <div style={progressContainerStyles}>
+          <OnboardingProgress />
+        </div>
         <Outlet />
       </main>
     </div>

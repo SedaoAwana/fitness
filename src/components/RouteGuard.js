@@ -7,6 +7,15 @@ const RouteGuard = ({ children, requireOnboarding = false }) => {
   const { user, userProfile, loading } = useAuth();
   const location = useLocation();
 
+  console.log('🛡️ RouteGuard:', {
+    pathname: location.pathname,
+    requireOnboarding,
+    user: user?.id,
+    userProfile: userProfile ? 'exists' : 'null',
+    onboardingComplete: userProfile?.onboarding_complete,
+    loading
+  });
+
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -20,7 +29,7 @@ const RouteGuard = ({ children, requireOnboarding = false }) => {
       }}>
         <div style={{
           textAlign: 'center',
-          color: colors.neutral[500],
+          color: colors.text.secondary,
         }}>
           <div style={{
             fontSize: typography.fontSize['4xl'],
@@ -45,13 +54,20 @@ const RouteGuard = ({ children, requireOnboarding = false }) => {
   }
 
   // If onboarding is required but not completed, redirect to onboarding
-  if (requireOnboarding && !userProfile?.onboarding_complete) {
+  if (requireOnboarding && (!userProfile || !userProfile.onboarding_complete)) {
+    console.log('🛡️ Redirecting to onboarding - profile missing or incomplete');
     return <Navigate to="/onboarding" replace />;
   }
 
   // If user is on onboarding but has already completed it, redirect to dashboard
   if (location.pathname === '/onboarding' && userProfile?.onboarding_complete) {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  // If user has no profile at all, redirect to onboarding (except if already on onboarding)
+  if (!userProfile && !location.pathname.startsWith('/onboarding')) {
+    console.log('🛡️ No profile found, redirecting to onboarding');
+    return <Navigate to="/onboarding" replace />;
   }
 
   return children;

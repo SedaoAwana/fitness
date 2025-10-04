@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { colors, spacing, typography } from '../design-tokens';
 
@@ -16,6 +16,9 @@ import OnboardingComplete from '../components/onboarding/OnboardingComplete';
 const Onboarding = () => {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  console.log('🎯 Onboarding component loaded, current path:', location.pathname);
 
   const containerStyles = {
     minHeight: '100vh',
@@ -36,20 +39,48 @@ const Onboarding = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
+  // Simple fallback - show WelcomeStep directly for now
+  console.log('🎯 Rendering onboarding content');
+  
+  // Force a simple test first
   return (
-    <div style={containerStyles}>
-      <div style={contentStyles}>
-        <Routes>
-          <Route index element={<Navigate to="welcome" replace />} />
-          <Route path="welcome" element={<WelcomeStep />} />
-          <Route path="basic-info" element={<BasicInfoStep />} />
-          <Route path="physical-info" element={<PhysicalInfoStep />} />
-          <Route path="lifestyle" element={<LifestyleStep />} />
-          <Route path="workout-preferences" element={<WorkoutPreferencesStep />} />
-          <Route path="goals" element={<GoalsStep />} />
-          <Route path="photo" element={<PhotoStep />} />
-          <Route path="complete" element={<OnboardingComplete />} />
-        </Routes>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'yellow',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    }}>
+      <div style={{
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '40px',
+        borderRadius: '8px',
+        textAlign: 'center',
+        fontSize: '24px',
+        fontWeight: 'bold'
+      }}>
+        🚨 ONBOARDING PAGE IS LOADING! 🚨
+        <br />
+        <br />
+        If you can see this, the component is working!
+        <br />
+        <br />
+        <button 
+          onClick={() => console.log('Button clicked!')}
+          style={{
+            backgroundColor: 'blue',
+            color: 'white',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '16px',
+            cursor: 'pointer'
+          }}
+        >
+          Test Button
+        </button>
       </div>
     </div>
   );

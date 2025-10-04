@@ -1,10 +1,10 @@
 import { supabase } from '../lib/supabase';
 
 class FitnessDataService {
-  async saveFitnessProfile(profileData) {
+  async createUserProfile(profileData) {
     try {
       const { data, error } = await supabase
-        .from('fitness_profiles')
+        .from('user_profiles')
         .insert([profileData])
         .select()
         .single();
@@ -12,8 +12,8 @@ class FitnessDataService {
       if (error) throw error;
       return { success: true, data };
     } catch (error) {
-      console.error('Save fitness profile error:', error);
-      return { success: false, error: 'Failed to save fitness profile' };
+      console.error('Create user profile error:', error);
+      return { success: false, error: 'Failed to create user profile' };
     }
   }
 
@@ -33,30 +33,11 @@ class FitnessDataService {
     }
   }
 
-  async getUserFitnessProfiles(userId) {
-    try {
-      const { data, error } = await supabase
-        .from('fitness_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return { success: true, data };
-    } catch (error) {
-      console.error('Get user fitness profiles error:', error);
-      return { success: false, error: 'Failed to load fitness profiles' };
-    }
-  }
-
   async getUserFitnessPrograms(userId) {
     try {
       const { data, error } = await supabase
         .from('fitness_programs')
-        .select(`
-          *,
-          fitness_profiles (*)
-        `)
+        .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
@@ -65,38 +46,6 @@ class FitnessDataService {
     } catch (error) {
       console.error('Get user fitness programs error:', error);
       return { success: false, error: 'Failed to load fitness programs' };
-    }
-  }
-
-  async updateFitnessProfile(profileId, updates) {
-    try {
-      const { data, error } = await supabase
-        .from('fitness_profiles')
-        .update(updates)
-        .eq('id', profileId)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return { success: true, data };
-    } catch (error) {
-      console.error('Update fitness profile error:', error);
-      return { success: false, error: 'Failed to update fitness profile' };
-    }
-  }
-
-  async deleteFitnessProfile(profileId) {
-    try {
-      const { error } = await supabase
-        .from('fitness_profiles')
-        .delete()
-        .eq('id', profileId);
-      
-      if (error) throw error;
-      return { success: true };
-    } catch (error) {
-      console.error('Delete fitness profile error:', error);
-      return { success: false, error: 'Failed to delete fitness profile' };
     }
   }
 

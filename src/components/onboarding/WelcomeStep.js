@@ -5,6 +5,8 @@ import Button from '../atoms/Button';
 
 const WelcomeStep = () => {
   const navigate = useNavigate();
+  
+  console.log('🎯 WelcomeStep component rendering');
 
   const containerStyles = {
     textAlign: 'center',
@@ -39,16 +41,56 @@ const WelcomeStep = () => {
   };
 
   return (
-    <div style={containerStyles}>
-      <div style={iconStyles}>🏋️‍♀️</div>
-      <h1 style={titleStyles}>Welcome to Your Fitness Journey!</h1>
-      <p style={subtitleStyles}>
+    <div style={{
+      textAlign: 'center',
+      padding: '40px',
+      backgroundColor: '#f8f9fa',
+      borderRadius: '8px',
+      border: '2px solid #007bff'
+    }}>
+      <div style={{ 
+        backgroundColor: 'green', 
+        color: 'white', 
+        padding: '10px', 
+        marginBottom: '20px',
+        borderRadius: '4px'
+      }}>
+        DEBUG: WelcomeStep is rendering
+      </div>
+      <div style={{ fontSize: '48px', marginBottom: '20px' }}>🏋️‍♀️</div>
+      <h1 style={{ 
+        fontSize: '32px', 
+        fontWeight: 'bold', 
+        color: '#2c3e50', 
+        marginBottom: '16px' 
+      }}>
+        Welcome to Your Fitness Journey!
+      </h1>
+      <p style={{ 
+        fontSize: '18px', 
+        color: '#7f8c8d', 
+        marginBottom: '30px', 
+        lineHeight: 1.6 
+      }}>
         Let's create your personalized fitness plan. This will only take a few minutes 
         and will help us understand your goals, preferences, and current fitness level.
       </p>
-      <Button onClick={handleGetStarted} style={buttonStyles}>
+      <button 
+        onClick={handleGetStarted}
+        style={{
+          backgroundColor: '#007bff',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          padding: '16px 32px',
+          fontSize: '16px',
+          fontWeight: '600',
+          cursor: 'pointer',
+          minWidth: '200px'
+        }}
+      >
         Get Started
-      </Button>
+      </button>
     </div>
   );
 };

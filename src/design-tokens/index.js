@@ -78,6 +78,18 @@ export const colors = {
     light: '#e9ecef',
     medium: '#dee2e6',
     dark: '#ced4da',
+  },
+
+  // Error Colors
+  error: {
+    light: '#f8d7da',
+    dark: '#721c24',
+  },
+
+  // Success Colors
+  success: {
+    light: '#d4edda',
+    dark: '#155724',
   }
 };
 
