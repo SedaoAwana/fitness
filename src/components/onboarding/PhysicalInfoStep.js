@@ -85,7 +85,7 @@ const PhysicalInfoStep = () => {
           type="number"
           value={form.weight}
           onChange={handleInputChange}
-          placeholder="70"
+          placeholder="weight in kg"
         />
         
         <Input
@@ -94,7 +94,7 @@ const PhysicalInfoStep = () => {
           type="number"
           value={form.height}
           onChange={handleInputChange}
-          placeholder="175"
+          placeholder="height in cm"
         />
         
         <Select

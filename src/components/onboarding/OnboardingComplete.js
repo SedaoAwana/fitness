@@ -75,34 +75,36 @@ const OnboardingComplete = () => {
         bmi = (onboardingData.weight / (heightInMeters * heightInMeters)).toFixed(1);
       }
 
-      // Create comprehensive user profile
-      const userProfile = {
-        user_id: user.id,
-        full_name: onboardingData.name,
-        age: parseInt(onboardingData.age),
-        gender: onboardingData.gender,
-        height: parseInt(onboardingData.height),
-        weight: parseFloat(onboardingData.weight),
-        body_shape: onboardingData.bodyShape,
-        activity_level: onboardingData.activityLevel,
-        work_situation: onboardingData.workSituation,
-        eating_habits: onboardingData.eatingHabits,
-        workout_location: onboardingData.workoutLocation,
-        workout_frequency: parseInt(onboardingData.workoutFrequency),
-        workout_duration: parseInt(onboardingData.workoutDuration),
-        experience_level: onboardingData.experienceLevel,
-        available_equipment: onboardingData.availableEquipment || [],
-        primary_goal: onboardingData.primaryGoal,
-        secondary_goals: onboardingData.secondaryGoals || [],
-        target_weight: onboardingData.targetWeight ? parseFloat(onboardingData.targetWeight) : null,
-        timeline: onboardingData.timeline,
-        motivation: onboardingData.motivation,
-        bmi: bmi,
-        onboarding_complete: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
+           // Create comprehensive user profile
+           const userProfile = {
+            id: user.id,  // Changed from 'user_id' to 'id'
+            email: user.email,  // Add this line!
+            full_name: onboardingData.name,
+            age: parseInt(onboardingData.age),
+            gender: onboardingData.gender,
+            height: parseInt(onboardingData.height),
+            weight: parseFloat(onboardingData.weight),
+            body_shape: onboardingData.bodyShape,
+            activity_level: onboardingData.activityLevel,
+            work_situation: onboardingData.workSituation,
+            eating_habits: onboardingData.eatingHabits,
+            workout_location: onboardingData.workoutLocation,
+            workout_frequency: parseInt(onboardingData.workoutFrequency),
+            workout_duration: parseInt(onboardingData.workoutDuration),
+            experience_level: onboardingData.experienceLevel,
+            available_equipment: onboardingData.availableEquipment || [],
+            primary_goal: onboardingData.primaryGoal,
+            secondary_goals: onboardingData.secondaryGoals || [],
+            target_weight: onboardingData.targetWeight ? parseFloat(onboardingData.targetWeight) : null,
+            timeline: onboardingData.timeline,
+            motivation: onboardingData.motivation,
+            bmi: bmi,
+            onboarding_complete: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          console.log('🎯 Primary goal value:', onboardingData.primaryGoal);
+          console.log('🎯 Full onboarding data:', onboardingData);
       // Save to Supabase
       const result = await FitnessDataService.createUserProfile(userProfile);
       

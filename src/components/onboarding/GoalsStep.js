@@ -51,13 +51,13 @@ const GoalsStep = () => {
 
   const primaryGoalOptions = [
     { value: '', label: 'Select your primary goal' },
-    { value: 'lose_weight', label: 'Lose Weight' },
-    { value: 'gain_muscle', label: 'Build Muscle' },
-    { value: 'get_stronger', label: 'Get Stronger' },
+    { value: 'lose_fat', label: 'Lose Fat' },
+    { value: 'build_muscle', label: 'Build Muscle' },
+    { value: 'increase_strength', label: 'Increase Strength' },
     { value: 'improve_endurance', label: 'Improve Endurance' },
-    { value: 'general_fitness', label: 'General Fitness' },
+    { value: 'maintain_fitness', label: 'Maintain Fitness' },
     { value: 'athletic_performance', label: 'Athletic Performance' },
-    { value: 'rehabilitation', label: 'Rehabilitation/Recovery' },
+    { value: 'rehabilitation', label: 'Rehabilitation' },
   ];
 
   const secondaryGoalOptions = [
@@ -151,7 +151,7 @@ const GoalsStep = () => {
           options={primaryGoalOptions}
         />
         
-        {form.primaryGoal === 'lose_weight' && (
+        {form.primaryGoal === 'lose_fat' && (
           <Input
             label="Target Weight (kg)"
             name="targetWeight"

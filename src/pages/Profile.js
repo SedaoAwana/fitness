@@ -146,7 +146,7 @@ const Profile = () => {
               type="number"
               value={profile.age}
               onChange={handleInputChange}
-              placeholder="25"
+              placeholder="Age"
             />
           </div>
           
@@ -178,7 +178,7 @@ const Profile = () => {
               type="number"
               value={profile.weight}
               onChange={handleInputChange}
-              placeholder="70"
+              placeholder="weight in kg"
             />
             <Input
               label="Height (cm)"
@@ -186,7 +186,7 @@ const Profile = () => {
               type="number"
               value={profile.height}
               onChange={handleInputChange}
-              placeholder="175"
+              placeholder="height in cm"
             />
           </div>
         </div>

@@ -93,7 +93,7 @@ const BasicInfoStep = () => {
           type="number"
           value={form.age}
           onChange={handleInputChange}
-          placeholder="25"
+          placeholder="Age"
         />
         
         <Select
