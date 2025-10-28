@@ -2,6 +2,7 @@ import React from 'react';
 import { colors, spacing } from '../../design-tokens';
 
 const Icon = ({ 
+  name,
   icon, 
   size = 'md',
   color = 'currentColor',
@@ -27,6 +28,31 @@ const Icon = ({
     }
   };
 
+  const getIconSymbol = (iconName) => {
+    const icons = {
+      'camera': '📷',
+      'upload': '📁',
+      'search': '🔍',
+      'arrow-left': '←',
+      'plus': '+',
+      'folder': '📁',
+      'check': '✓',
+      'close': '✕',
+      'menu': '☰',
+      'settings': '⚙️',
+      'user': '👤',
+      'home': '🏠',
+      'heart': '❤️',
+      'star': '⭐',
+      'info': 'ℹ️',
+      'warning': '⚠️',
+      'error': '❌',
+      'success': '✅',
+      'loading': '⏳',
+    };
+    return icons[iconName] || iconName || '?';
+  };
+
   const baseStyles = {
     display: 'inline-block',
     color: color,
@@ -35,12 +61,15 @@ const Icon = ({
     ...style,
   };
 
+  // Support both 'name' and 'icon' props for backwards compatibility
+  const iconContent = name ? getIconSymbol(name) : icon;
+
   return (
     <span
       style={baseStyles}
       {...props}
     >
-      {icon}
+      {iconContent}
     </span>
   );
 };
