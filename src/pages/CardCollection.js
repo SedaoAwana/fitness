@@ -57,7 +57,13 @@ const CardCollection = () => {
     })
     .sort((a, b) => {
       if (sortBy === 'dateAdded') return new Date(b.dateAdded) - new Date(a.dateAdded);
-      if (sortBy === 'value') return parseInt(b.estimatedValue.match(/\d+/)[0]) - parseInt(a.estimatedValue.match(/\d+/)[0]);
+      if (sortBy === 'value') {
+        const aMatch = a.estimatedValue.match(/\d+/);
+        const bMatch = b.estimatedValue.match(/\d+/);
+        const aValue = aMatch ? parseInt(aMatch[0]) : 0;
+        const bValue = bMatch ? parseInt(bMatch[0]) : 0;
+        return bValue - aValue;
+      }
       if (sortBy === 'name') return a.cardName.localeCompare(b.cardName);
       return 0;
     });
@@ -195,7 +201,8 @@ const CardCollection = () => {
   };
 
   const totalValue = collection.reduce((sum, card) => {
-    const value = parseInt(card.estimatedValue.match(/\d+/)[0]);
+    const match = card.estimatedValue.match(/\d+/);
+    const value = match ? parseInt(match[0]) : 0;
     return sum + value;
   }, 0);
 

@@ -107,15 +107,15 @@ const DebugPanel = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'connected': return colors.success[500];
-      case 'testing': return '#f39c12';
-      case 'error': return '#e74c3c';
+      case 'testing': return colors.primary[400];
+      case 'error': return colors.error?.light || '#e74c3c';
       default: return colors.neutral[400];
     }
   };
 
   const getLevelColor = (level) => {
     switch (level) {
-      case 'ERROR': return '#e74c3c';
+      case 'ERROR': return colors.error?.light || '#e74c3c';
       case 'SUCCESS': return colors.success[500];
       case 'INFO': return colors.primary[500];
       case 'DEBUG': return colors.neutral[600];
